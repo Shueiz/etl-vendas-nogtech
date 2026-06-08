@@ -29,6 +29,8 @@ O ecossistema é baseado em microserviços isolados e integrados via **Docker Co
 
 ## ⚡ Estratégias Técnicas do Pipeline (ETL)
 
+![Grafo de Execução do Pipeline no Airflow](assets/airflow_dag.png)
+
 O pipeline implementado na DAG `etl_vendas_diarias` atende a todos os requisitos de negócio, focando em engenharia de software de alta performance:
 
 ### 1. Extração (Extract) e Cruzamento (Join)
@@ -47,6 +49,8 @@ O pipeline implementado na DAG `etl_vendas_diarias` atende a todos os requisitos
 ---
 
 ## 📊 Insights de Negócio Revelados
+
+![Visão Geral do Dashboard Executivo no Metabase](assets/dashboard.png)
 
 Ao plugar o Metabase na camada de consumo, o dashboard gerou descobertas críticas:
 * **O Paradoxo do Suporte:** A empresa registrou cerca de 4,1 mil vendas totais, mas gerou uma volumetria de **4,7 mil Tickets de Suporte**. Há mais de um chamado por cliente cadastrado.
