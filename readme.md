@@ -6,7 +6,7 @@
 ![Metabase](https://img.shields.io/badge/Metabase-0.49-royalpurple.svg)
 ![Pandas](https://img.shields.io/badge/pandas-%23150458.svg)
 
-Este projeto apresenta uma solução completa de Engenharia de Dados de ponta a ponta, desenvolvida para processar, enriquecer e analisar os dados de vendas e engajamento da plataforma educacional **NogTech**. A arquitetura foi totalmente containerizada e orquestrada de forma profissional, garantindo robustez, idempotência e governança de dados (LGPD).
+Este projeto apresenta uma solução completa de Engenharia de Dados de ponta a ponta, desenvolvida para processar, enriquecer e analisar os dados de vendas e engajamento da plataforma educacional **NogTech**. A arquitetura foi totalmente containerizada e orquestrada de forma profissional com **Apache Airflow**, garantindo robustez, idempotência e governança de dados (LGPD).
 
 ---
 
@@ -20,33 +20,38 @@ O ecossistema é baseado em microserviços isolados e integrados via **Docker Co
 > ➡️ **[Metabase]** (Dashboard C-Level)
 
 ### Componentes Utilizados:
-* **Apache Airflow (v2.9.1):** Responsável pelo agendamento, monitoramento e execução acíclica direta (DAG) das etapas do pipeline.
-* **Pandas & PyArrow:** Motores de processamento paralelo e transformação de dados altamente tipados.
-* **SQLite (Camada Analítica):** Banco de dados leve embarcado mapeado em disco para servir como o repositório final de consumo.
-* **Metabase (v0.49):** Ferramenta de Business Intelligence conectada à camada analítica para visualização dinâmica de dados.
+* **Apache Airflow (v2.9.1):** Responsável pelo agendamento, monitoramento, interface de observabilidade (DAGs) e gestão de dependências.
+* **Pandas & PyArrow:** Motores de processamento em memória e transformação de dados altamente tipados.
+* **SQLite (Camada Analítica):** Banco de dados leve embarcado mapeado em disco para servir como repositório final de consumo.
+* **Metabase (v0.49):** Ferramenta de Business Intelligence para visualização dinâmica de dados.
 
 ---
 
-## ⚡ Detalhes Técnicos do Pipeline (ETL)
+## ⚡ Estratégias Técnicas do Pipeline (ETL)
 
-O pipeline implementado na DAG `etl_vendas_diarias` resolveu dores complexas de qualidade de dados:
+O pipeline implementado na DAG `etl_vendas_diarias` atende a todos os requisitos de negócio, focando em engenharia de software de alta performance:
 
-1.  **Extração Corretiva:** Reconstrução cronológica uniforme de datas e padronização prévia de chaves (CPFs) antes do cruzamento (`LEFT JOIN`), evitando perdas de métricas de engajamento.
-2.  **Transformação e Governança:**
-    * **Anonimização (LGPD):** Remoção de dados sensíveis e mascaramento de CPF (`***.XXX.XXX-**`).
-    * **Enriquecimento com BrasilAPI:** Consulta assíncrona para tradução de CEPs em Estados reais e descoberta de vendas em Feriados Nacionais.
-    * **Tipagem Estrita:** Limpeza de caracteres monetários e strings malformadas, garantindo integridade para o formato Parquet.
-3.  **Carga Inteligente (Idempotência):** Mecanismo de auto-higienização (`shutil.rmtree`) que limpa partições antigas/poluídas antes de persistir o novo lote particionado fisicamente por **Ano** e **Mês**.
+### 1. Extração (Extract) e Cruzamento (Join)
+* Realizamos a ingestão das fontes locais (CSV `latin-1` e JSON `utf-8`).
+* **Padronização prévia:** Reconstrução cronológica do mês de referência (formato `YYYY-MM`) e limpeza dos CPFs antes do cruzamento (`LEFT JOIN`). Isso garantiu que nenhuma transação perdesse os dados de engajamento por falha de formatação.
+
+### 2. Transformação (Transform) e Resiliência
+* **Anonimização (LGPD):** Remoção definitiva da coluna de identificação direta (`nome_aluno`) e mascaramento rigoroso do CPF mantendo os 6 dígitos centrais (`***.XXX.XXX-**`).
+* **Enriquecimento via BrasilAPI com Cache:** Integração para tradução de CEPs (Bairro, Cidade, Estado) e análise do calendário de Feriados Nacionais.
+* **🛡️ Tratamento de Erros e Uso de Cache (Requisito Crítico):** Para evitar sobrecarga de rede e respeitar o limite da BrasilAPI pública, implementamos **Caches em Memória** (Dicionários Python e Listas). A API é chamada apenas uma vez por CEP único ou Ano único. Além disso, aplicamos **Resiliência (Try/Except)**: caso a API caia, sofra *timeout* ou o CEP seja inválido, o pipeline não quebra. O algoritmo desvia o fluxo e cataloga os campos como `NI` (Não Informado), preservando os dados financeiros da transação.
+
+### 3. Carga (Load) e Idempotência
+* **Estratégia de Idempotência Adotada:** Optamos pelo **Particionamento por data com Overwrite (Sobrescrita Limpa)**.
+* **Justificativa:** Diferente de um UPSERT em banco de dados que exige constante verificação de chaves linha a linha (custoso para Big Data), a sobrescrita de partições (`shutil.rmtree`) garante que o diretório legado do respectivo Ano/Mês seja completamente higienizado antes de salvar os novos arquivos `.parquet`. Isso permite que o pipeline rode infinitas vezes no mesmo lote mantendo a consistência do *Data Lake* livre de poluição ou duplicidades, sendo a estratégia mais performática para processamento de arquivos distribuídos.
 
 ---
 
 ## 📊 Insights de Negócio Revelados
 
-Ao cruzar os dados de vendas com o engajamento na camada analítica, o dashboard gerou descobertas críticas para a tomada de decisão executiva:
-
+Ao plugar o Metabase na camada de consumo, o dashboard gerou descobertas críticas:
 * **O Paradoxo do Suporte:** A empresa registrou cerca de 4,1 mil vendas totais, mas gerou uma volumetria de **4,7 mil Tickets de Suporte**. Há mais de um chamado por cliente cadastrado.
-* **Depreciação do NPS:** Essa sobrecarga operacional reflete perfeitamente no **NPS Geral crítico de 2.11** (Zona de Detração máxima).
-* **Alerta de Churn (Cancelamento):** Alunos que avaliaram o curso com nota zero assistiram, em média, a apenas **8.7 horas**, enquanto o restante dos alunos manteve consumo estável acima de 65 horas, provando que o atrito tecnológico inicial está afastando os clientes.
+* **Depreciação do NPS:** Essa sobrecarga operacional reflete perfeitamente no **NPS Geral crítico de 2.11**.
+* **Alerta de Churn (Cancelamento):** Alunos que avaliaram o curso com nota zero assistiram, em média, a apenas **8.7 horas**, enquanto o restante dos alunos manteve consumo acima de 65 horas. O atrito inicial com a plataforma está gerando cancelamentos rápidos.
 
 ---
 
