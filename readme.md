@@ -57,27 +57,33 @@ Ao plugar o Metabase na camada de consumo, o dashboard gerou descobertas crític
 
 ## 🛠️ Como Executar o Projeto Localmente
 
+### Passo 0: Preparação dos Dados (Mock Data)
+Como os dados reais do projeto contêm informações sensíveis (LGPD), eles foram bloqueados pelo `.gitignore`. Para que qualquer desenvolvedor ou recrutador consiga testar o pipeline:
+1. Copie os arquivos fictícios localizados na pasta `dados_amostra/`.
+2. Crie uma pasta chamada `data/` na raiz deste projeto.
+3. Cole os arquivos originais renomeados como `transacoes_nogtech.csv` e `engajamento_alunos.json` dentro da nova pasta `data/`.
+
 ### Passo 1: Inicializar a Infraestrutura
-Certifique-se de que o Docker está em execução. Na raiz do projeto (onde está o arquivo `docker-compose.yml`), abra o terminal e inicialize os contêineres:
+Certifique-se de que o Docker está em execução. Na raiz do projeto, abra o terminal e inicialize os contêineres:
 
     docker-compose up -d
 
 ### Passo 2: Permissões de Disco (Acesso a Volumes)
-Para que o ambiente isolado do Docker consiga escrever os arquivos Parquet na sua máquina física, as permissões variam de acordo com o Sistema Operacional:
+Para que o ambiente isolado do Docker consiga escrever os arquivos Parquet na sua máquina física, as permissões variam:
 * **Linux / macOS:** É necessário conceder permissão de escrita local. No terminal, execute:
 
     sudo chmod -R 777 data/
 
-* **Windows:** O *Docker Desktop* gerencia as permissões de pastas automaticamente nativo ou via WSL 2. Nenhuma configuração extra de linha de comando é necessária nesta etapa.
+* **Windows:** O *Docker Desktop* gerencia as permissões de pastas automaticamente. Nenhuma configuração extra é necessária.
 
 ### Passo 3: Executar a DAG e Observabilidade
-1. Acesse a interface visual do Airflow em `http://localhost:8080` (credenciais padrões configuradas no docker-compose).
-2. Ative o *toggle* da DAG `etl_vendas_diarias` e clique em **Trigger DAG** (ícone de Play). Acompanhe o grafo de execução até a conclusão dos nós (status verde).
+1. Acesse a interface visual do Airflow em `http://localhost:8080` (credenciais padrões do compose).
+2. Ative o *toggle* da DAG `etl_vendas_diarias` e clique em **Trigger DAG** (ícone de Play). Acompanhe o grafo de execução até o status verde. Verifique a criação do banco SQLite e dos Parquets na pasta `data/`.
 
 ### Passo 4: Visualizar no Metabase
 1. Acesse o Metabase em `http://localhost:3000`.
 2. Conecte ao banco de dados escolhendo a opção SQLite e apontando para o arquivo físico gerado no contêiner: `/opt/airflow/data/data_lake.db`.
-3. (Opcional) Adicione o GeoJSON dos estados do Brasil nas configurações de *Admin* para habilitar o Mapa de Calor regional.
+3. *Nota Arquitetural:* Como o Metabase é executado isoladamente em seu próprio contêiner, os Dashboards criados não são versionados pelo GitHub. A prova visual da inteligência de negócios gerada encontra-se na demonstração em vídeo e nas imagens de documentação.
 
 ---
 *Projeto desenvolvido como portfólio de Engenharia de Dados e Business Intelligence.*
