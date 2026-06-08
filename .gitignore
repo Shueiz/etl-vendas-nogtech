@@ -1,0 +1,15 @@
+# Ignorar as pastas de dados e metadados
+data/
+logs/
+plugins/
+
+# Ignorar extensões de banco de dados e Big Data caso escapem
+*.db
+*.parquet
+*.csv
+*.json
+
+# Ignorar arquivos do sistema Python e VS Code
+__pycache__/
+.vscode/
+.env
