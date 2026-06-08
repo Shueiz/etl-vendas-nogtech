@@ -32,16 +32,16 @@ O ecossistema é baseado em microserviços isolados e integrados via **Docker Co
 O pipeline implementado na DAG `etl_vendas_diarias` atende a todos os requisitos de negócio, focando em engenharia de software de alta performance:
 
 ### 1. Extração (Extract) e Cruzamento (Join)
-* Realizamos a ingestão das fontes locais (CSV `latin-1` e JSON `utf-8`).
-* **Padronização prévia:** Reconstrução cronológica do mês de referência (formato `YYYY-MM`) e limpeza dos CPFs antes do cruzamento (`LEFT JOIN`). Isso garantiu que nenhuma transação perdesse os dados de engajamento por falha de formatação.
+* A ingestão das fontes locais (CSV `latin-1` e JSON `utf-8`) é feita de forma automatizada.
+* **Padronização prévia:** Foi implementada a reconstrução cronológica do mês de referência (formato `YYYY-MM`) e a limpeza dos CPFs antes do cruzamento (`LEFT JOIN`). Isso garantiu que nenhuma transação perdesse os dados de engajamento por falha de formatação.
 
 ### 2. Transformação (Transform) e Resiliência
 * **Anonimização (LGPD):** Remoção definitiva da coluna de identificação direta (`nome_aluno`) e mascaramento rigoroso do CPF mantendo os 6 dígitos centrais (`***.XXX.XXX-**`).
 * **Enriquecimento via BrasilAPI com Cache:** Integração para tradução de CEPs (Bairro, Cidade, Estado) e análise do calendário de Feriados Nacionais.
-* **🛡️ Tratamento de Erros e Uso de Cache (Requisito Crítico):** Para evitar sobrecarga de rede e respeitar o limite da BrasilAPI pública, implementamos **Caches em Memória** (Dicionários Python e Listas). A API é chamada apenas uma vez por CEP único ou Ano único. Além disso, aplicamos **Resiliência (Try/Except)**: caso a API caia, sofra *timeout* ou o CEP seja inválido, o pipeline não quebra. O algoritmo desvia o fluxo e cataloga os campos como `NI` (Não Informado), preservando os dados financeiros da transação.
+* **🛡️ Tratamento de Erros e Uso de Cache (Requisito Crítico):** Para evitar sobrecarga de rede e respeitar o limite da BrasilAPI pública, foram implementados **Caches em Memória** (Dicionários Python e Listas). A API é chamada apenas uma vez por CEP único ou Ano único. Além disso, foi aplicada a lógica de **Resiliência (Try/Except)**: caso a API caia, sofra *timeout* ou o CEP seja inválido, o pipeline não quebra. O algoritmo desvia o fluxo e cataloga os campos como `NI` (Não Informado), preservando os dados financeiros da transação.
 
 ### 3. Carga (Load) e Idempotência
-* **Estratégia de Idempotência Adotada:** Optamos pelo **Particionamento por data com Overwrite (Sobrescrita Limpa)**.
+* **Estratégia de Idempotência Adotada:** A opção escolhida foi o **Particionamento por data com Overwrite (Sobrescrita Limpa)**.
 * **Justificativa:** Diferente de um UPSERT em banco de dados que exige constante verificação de chaves linha a linha (custoso para Big Data), a sobrescrita de partições (`shutil.rmtree`) garante que o diretório legado do respectivo Ano/Mês seja completamente higienizado antes de salvar os novos arquivos `.parquet`. Isso permite que o pipeline rode infinitas vezes no mesmo lote mantendo a consistência do *Data Lake* livre de poluição ou duplicidades, sendo a estratégia mais performática para processamento de arquivos distribuídos.
 
 ---
@@ -58,25 +58,26 @@ Ao plugar o Metabase na camada de consumo, o dashboard gerou descobertas crític
 ## 🛠️ Como Executar o Projeto Localmente
 
 ### Passo 1: Inicializar a Infraestrutura
-Na raiz do projeto (onde está o `docker-compose.yml`), execute:
-```bash
-docker-compose up -d
-```
+Certifique-se de que o Docker está em execução. Na raiz do projeto (onde está o arquivo `docker-compose.yml`), abra o terminal e inicialize os contêineres:
 
-### Passo 2: Permissões de Disco
-Como o Docker roda em ambiente isolado, garanta que ele pode escrever os arquivos Parquet na sua máquina:
-```bash
-sudo chmod -R 777 data/
-```
+    docker-compose up -d
 
-### Passo 3: Executar a DAG
-1. Acesse o Airflow em `http://localhost:8080` (credenciais padrão do compose).
-2. Ative o toggle da DAG `etl_vendas_diarias` e clique em **Trigger DAG** (Play). Aguarde todas as tarefas ficarem verdes.
+### Passo 2: Permissões de Disco (Acesso a Volumes)
+Para que o ambiente isolado do Docker consiga escrever os arquivos Parquet na sua máquina física, as permissões variam de acordo com o Sistema Operacional:
+* **Linux / macOS:** É necessário conceder permissão de escrita local. No terminal, execute:
+
+    sudo chmod -R 777 data/
+
+* **Windows:** O *Docker Desktop* gerencia as permissões de pastas automaticamente nativo ou via WSL 2. Nenhuma configuração extra de linha de comando é necessária nesta etapa.
+
+### Passo 3: Executar a DAG e Observabilidade
+1. Acesse a interface visual do Airflow em `http://localhost:8080` (credenciais padrões configuradas no docker-compose).
+2. Ative o *toggle* da DAG `etl_vendas_diarias` e clique em **Trigger DAG** (ícone de Play). Acompanhe o grafo de execução até a conclusão dos nós (status verde).
 
 ### Passo 4: Visualizar no Metabase
 1. Acesse o Metabase em `http://localhost:3000`.
-2. Conecte ao banco SQLite apontando para o mapeamento do contêiner: `/opt/airflow/data/data_lake.db` (ou o nome do seu arquivo `.db` configurado).
-3. (Opcional) Adicione o GeoJSON dos estados do Brasil nas configurações de Admin para habilitar o Mapa de Calor regional.
+2. Conecte ao banco de dados escolhendo a opção SQLite e apontando para o arquivo físico gerado no contêiner: `/opt/airflow/data/data_lake.db`.
+3. (Opcional) Adicione o GeoJSON dos estados do Brasil nas configurações de *Admin* para habilitar o Mapa de Calor regional.
 
 ---
 *Projeto desenvolvido como portfólio de Engenharia de Dados e Business Intelligence.*
