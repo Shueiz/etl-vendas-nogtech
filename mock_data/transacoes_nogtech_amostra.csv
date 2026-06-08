@@ -1,0 +1,6 @@
+id_transacao;data_transacao;cpf_aluno;nome_aluno;plano_adquirido;valor_brl;cep_cobranca
+TXT-001;15/01/2024;111.222.333-44;Bruce Wayne;Premium;1500,00;01001000
+TXT-002;05/02/2024;55566677788;Clark Kent;Anual;900,50;20040000
+TXT-003;10/03/2024;999.888.777-66;Diana Prince;Básico;150,00;30140071
+TXT-004;12/04/2024;111.222.333-44;Bruce Wayne;Premium;1500,00;01001000
+TXT-005;01/05/2024;444.333.222-11;Barry Allen;Não Informado;0,00;60060440

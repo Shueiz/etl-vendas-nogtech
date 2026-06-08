@@ -1,0 +1,30 @@
+[
+  {
+    "cpf_aluno": "111.222.333-44",
+    "mes_referencia": "2024-01",
+    "horas_assistidas": 120.5,
+    "tickets_suporte": 0,
+    "nps_score": 10
+  },
+  {
+    "cpf_aluno": "55566677788",
+    "mes_referencia": "2024-02",
+    "horas_assistidas": 45.0,
+    "tickets_suporte": 2,
+    "nps_score": 7
+  },
+  {
+    "cpf_aluno": "999.888.777-66",
+    "mes_referencia": "2024-03",
+    "horas_assistidas": 5.2,
+    "tickets_suporte": 5,
+    "nps_score": 2
+  },
+  {
+    "cpf_aluno": "111.222.333-44",
+    "mes_referencia": "2024-04",
+    "horas_assistidas": 130.0,
+    "tickets_suporte": 1,
+    "nps_score": 9
+  }
+]
