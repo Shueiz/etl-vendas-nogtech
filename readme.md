@@ -59,35 +59,51 @@ Ao plugar o Metabase na camada de consumo, o dashboard gerou descobertas crític
 
 ---
 
-## 🛠️ Como Executar o Projeto Localmente
+### 🚀 Como Executar o Projeto Localmente
 
-### Passo 0: Preparação dos Dados (Mock Data)
-Como os dados reais do projeto contêm informações sensíveis (LGPD), eles foram bloqueados pelo `.gitignore`. Para que qualquer desenvolvedor ou recrutador consiga testar o pipeline:
-1. Copie os arquivos fictícios localizados na pasta `dados_amostra/`.
-2. Crie uma pasta chamada `data/` na raiz deste projeto.
-3. Cole os arquivos originais renomeados como `transacoes_nogtech.csv` e `engajamento_alunos.json` dentro da nova pasta `data/`.
+**Passo 0: Preparar os Dados de Amostra**
+Para simular a ingestão de dados, o Airflow precisa encontrar os arquivos com os nomes exatos na pasta correta:
+1. Copie os arquivos que estão dentro da pasta `mock_data/` para dentro da pasta `data/` (na raiz do projeto).
+2. Na pasta `data/`, renomeie o arquivo CSV de amostra para **`transacoes_nogtech.csv`** (remova a parte "_amostra"). É este nome exato que o pipeline monitora.
 
-### Passo 1: Inicializar a Infraestrutura
-Certifique-se de que o Docker está em execução. Na raiz do projeto, abra o terminal e inicialize os contêineres:
+**Passo 1: Configurar Permissões de Usuário (Linux/Mac)**
+Para garantir que o Docker tenha as permissões corretas de leitura e escrita nos volumes locais, crie um arquivo `.env` com o seu identificador de usuário. No terminal, na raiz do projeto, execute:
+
+    echo -e "AIRFLOW_UID=$(id -u)" > .env
+
+*(Nota: Usuários de Windows com Docker Desktop podem pular esta etapa).*
+
+**Passo 2: Iniciar a Infraestrutura**
+Levante os contêineres em segundo plano executando o comando abaixo:
 
     docker-compose up -d
 
-### Passo 2: Permissões de Disco (Acesso a Volumes)
-Para que o ambiente isolado do Docker consiga escrever os arquivos Parquet na sua máquina física, as permissões variam:
-* **Linux / macOS:** É necessário conceder permissão de escrita local. No terminal, execute:
+> ⏳ **Aviso:** O Apache Airflow é uma ferramenta robusta. Aguarde cerca de 2 a 3 minutos para que o banco de dados interno seja inicializado completamente na primeira execução.
 
-    sudo chmod -R 777 data/
+**Passo 3: Acessar o Orquestrador (Airflow)**
+Abra o seu navegador e acesse a interface do Airflow em: `http://localhost:8080`
+* **Usuário:** `airflow`
+* **Senha:** `airflow`
 
-* **Windows:** O *Docker Desktop* gerencia as permissões de pastas automaticamente. Nenhuma configuração extra é necessária.
+**Passo 4: Configurar a Conexão de Arquivos (Governança)**
+Por questões de segurança, o Airflow exige que o acesso ao sistema de arquivos local seja explicitamente autorizado. Para que o sensor de arquivos funcione corretamente:
+1. No menu superior, vá em **Admin > Connections**.
+2. Clique no botão azul **+ (Add a new record)**.
+3. Preencha apenas dois campos:
+   * **Connection Id:** `fs_default`
+   * **Connection Type:** `File (path)`
+4. Clique no botão **Save**.
 
-### Passo 3: Executar a DAG e Observabilidade
-1. Acesse a interface visual do Airflow em `http://localhost:8080` (credenciais padrões do compose).
-2. Ative o *toggle* da DAG `etl_vendas_diarias` e clique em **Trigger DAG** (ícone de Play). Acompanhe o grafo de execução até o status verde. Verifique a criação do banco SQLite e dos Parquets na pasta `data/`.
+**Passo 5: Executar o Pipeline**
+1. Na tela inicial (DAGs), ative o pipeline `etl_vendas_diarias` clicando no botão de *toggle* à esquerda.
+2. Caso a primeira tarefa (`aguardar_arquivo_csv`) tenha falhado ou ficado travada enquanto você configurava a conexão, clique nela, selecione o botão **Clear** e confirme. O Airflow retomará a execução e encontrará os arquivos do Passo 0 instantaneamente!
 
-### Passo 4: Visualizar no Metabase
-1. Acesse o Metabase em `http://localhost:3000`.
-2. Conecte ao banco de dados escolhendo a opção SQLite e apontando para o arquivo físico gerado no contêiner: `/opt/airflow/data/data_lake.db`.
-3. *Nota Arquitetural:* Como o Metabase é executado isoladamente em seu próprio contêiner, os Dashboards criados não são versionados pelo GitHub. A prova visual da inteligência de negócios gerada encontra-se na demonstração em vídeo e nas imagens de documentação.
+**Passo 6: Visualizar os Dados no BI (Metabase)**
+Após a DAG ser executada com sucesso e os arquivos `Parquet` limpos e padronizados serem criados, os dados estarão prontos para consumo na camada visual.
+Acesse no seu navegador: `http://localhost:3000`
+1. Crie a sua conta de administrador local (apenas para acesso à sua própria máquina).
+2. Adicione um novo banco de dados escolhendo o motor **SQLite**.
+3. Explore os dados e cruze as informações!
 
----
+> ⚠️ **Nota Técnica sobre Exportação de Dashboards:** O Metabase utiliza um banco de dados interno em contêiner (H2) para armazenar suas configurações visuais. Para evitar quebras de caminhos absolutos (*Absolute Paths*) em sistemas operacionais diferentes e conflitos de infraestrutura, os arquivos do painel gerado não são versionados neste repositório Git. A comprovação integral da inteligência de negócios extraída da base pode ser conferida através dos prints de demonstração na pasta `assets/` e no vídeo de apresentação deste projeto.
 *Projeto desenvolvido como portfólio de Engenharia de Dados e Business Intelligence.*
