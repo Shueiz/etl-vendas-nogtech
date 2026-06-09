@@ -10,6 +10,14 @@ Este projeto apresenta uma solução completa de Engenharia de Dados de ponta a 
 
 ---
 
+### 🎥 Demonstração Completa do Projeto
+
+[![Assista ao Vídeo de Apresentação](https://img.youtube.com/vi/IF-XPscPmO4/0.jpg)](https://www.youtube.com/watch?v=IF-XPscPmO4)
+
+> 💡 **Nota:** Clique na imagem acima ou [neste link direto](https://www.youtube.com/watch?v=IF-XPscPmO4) para assistir ao vídeo de apresentação com a explicação da arquitetura, a execução do pipeline no Airflow e a análise dos dados no Metabase.
+
+---
+
 ## 🏗️ Arquitetura do Ecossistema
 
 O ecossistema é baseado em microserviços isolados e integrados via **Docker Compose**, minimizando o consumo de recursos locais e garantindo portabilidade absoluta:
