@@ -64,7 +64,7 @@ Ao plugar o Metabase na camada de consumo, o dashboard gerou descobertas crític
 **Passo 0: Preparar os Dados de Amostra**
 Para simular a ingestão de dados, o Airflow precisa encontrar os arquivos com os nomes exatos na pasta correta:
 1. Copie os arquivos que estão dentro da pasta `mock_data/` para dentro da pasta `data/` (na raiz do projeto).
-2. Na pasta `data/`, renomeie o arquivo CSV de amostra para **`transacoes_nogtech.csv`** (remova a parte "_amostra"). É este nome exato que o pipeline monitora.
+2. Na pasta `data/`, renomeie os arquivos de amostra para **`transacoes_nogtech.csv`** e **`engajamento_alunos.json`** (remova a parte "_amostra"). É este nome exato que o pipeline monitora.
 
 **Passo 1: Configurar Permissões de Usuário (Linux/Mac)**
 Para garantir que o Docker tenha as permissões corretas de leitura e escrita nos volumes locais, crie um arquivo `.env` com o seu identificador de usuário. No terminal, na raiz do projeto, execute:
@@ -106,4 +106,5 @@ Acesse no seu navegador: `http://localhost:3000`
 3. Explore os dados e cruze as informações!
 
 > ⚠️ **Nota Técnica sobre Exportação de Dashboards:** O Metabase utiliza um banco de dados interno em contêiner (H2) para armazenar suas configurações visuais. Para evitar quebras de caminhos absolutos (*Absolute Paths*) em sistemas operacionais diferentes e conflitos de infraestrutura, os arquivos do painel gerado não são versionados neste repositório Git. A comprovação integral da inteligência de negócios extraída da base pode ser conferida através dos prints de demonstração na pasta `assets/` e no vídeo de apresentação deste projeto.
+
 *Projeto desenvolvido como portfólio de Engenharia de Dados e Business Intelligence.*
