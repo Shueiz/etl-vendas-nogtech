@@ -34,6 +34,38 @@ O ecossistema é baseado em microserviços isolados e integrados via **Docker Co
 * **Metabase (v0.49):** Ferramenta de Business Intelligence para visualização dinâmica de dados.
 
 ---
+## 📊 Dashboard de Análise Executiva (NogTech)
+
+![Texto Alternativo](link_do_seu_gif_ou_print_principal.gif)
+
+### 📈 Breve Explicação dos Resultados (Diretoria NogTech)
+
+> **Cenário Geral:** O pipeline processou e consolidou um volume total de **4.1K vendas** ao longo do ano de 2024, gerando um faturamento bruto de **R$ 826.8K** com um **ticket médio de R$ 198,18** por transação.
+
+A análise cruzada dos dados tratados revela três grandes insights para a diretoria:
+1. **Crise de Satisfação (NPS):** O NPS médio da plataforma está em **2.11 (Zona de Crítica)**. O gráfico de engajamento prova que os alunos que deram nota zero assistiram a menos de 9 horas de aula, indicando uma rejeição precoce ao conteúdo.
+2. **Sobrecarga no Suporte:** Essa insatisfação gerou um volume alarmante de **4.7K tickets de suporte**, um número maior do que o próprio total de vendas, indicando falhas operacionais ou dúvidas severas no produto.
+3. **Distribuição Geográfica e Sazonalidade:** O faturamento se concentra fortemente no estado de **SP (R$ 154.1K)**. Na linha do tempo, as vendas se mantêm estáveis mês a mês, oscilando entre R$ 55K e R$ 80K, sem grandes picos sazonais.
+
+---
+
+### 📸 Evidências Técnicas e Prints do Painel
+
+<details>
+<summary><b>Clique aqui para visualizar os prints das telas e filtros</b></summary>
+
+#### Visão Geral do Painel
+![Dashboard Filtrado por Estado](assets/dashFiltrado.png.png)
+
+#### Filtro por Estado (Exemplo: SP)
+![Dashboard Filtrado por Período](assets/dashData.png.png)
+
+#### Novos Cards (Ticket Médio e Total de Vendas)
+![Filtros Aplicados Juntos](assets/dashFiltros.png.png)
+
+</details>
+
+---
 
 ## ⚡ Estratégias Técnicas do Pipeline (ETL)
 
