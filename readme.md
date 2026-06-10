@@ -36,8 +36,7 @@ O ecossistema é baseado em microserviços isolados e integrados via **Docker Co
 ---
 ## 📊 Dashboard de Análise Executiva (NogTech)
 
-![Dashboard em Funcionamento]([Gravação de tela de 09-06-2026 17:54:53.webm](https://github.com/user-attachments/assets/d2d3e1a5-69e0-4277-a7a7-cbf5c6669239))
-
+![Dashboard em Funcionamento](https://github.com/user-attachments/assets/d2d3e1a5-69e0-4277-a7a7-cbf5c6669239)
 
 ### 📈 Breve Explicação dos Resultados (Diretoria NogTech)
 
