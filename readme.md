@@ -54,13 +54,13 @@ A análise cruzada dos dados tratados revela três grandes insights para a diret
 <details>
 <summary><b>Clique aqui para visualizar os prints das telas e filtros</b></summary>
 
-#### Visão Geral do Painel
+#### Filtro por Estado (Exemplo: SP)
 ![Dashboard Filtrado por Estado](assets/dashFiltrado.png)
 
-#### Filtro por Estado (Exemplo: SP)
+#### Filtro por Data
 ![Dashboard Filtrado por Período](assets/dashData.png)
 
-#### Novos Cards (Ticket Médio e Total de Vendas)
+#### Funcionamento em Conjunto
 ![Filtros Aplicados Juntos](assets/dashFiltros.png)
 
 </details>
